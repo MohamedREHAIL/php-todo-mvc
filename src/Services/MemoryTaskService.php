@@ -45,60 +45,69 @@ class MemoryTaskService implements TaskServiceInterface {
   /**
    * @inheritDoc
    */
-  public function list ( array $args = [] ) : array {
-    $results = [];
-  
-    // Filters results : we exclude unwanted tasks from output
-    foreach ( $this->data as $task ) :
-      // Search filter
-      if ( isset( $args['search'] ) && ! str_contains( $task->getTitle(), $args['search'] ) )
-        continue;
-    
-      // If we only want to show uncompleted tasks
-      if ( isset( $args['hideCompleted'] ) && $args['hideCompleted'] && $task->isCompleted() )
-        continue;
-    
-      $results[] = $task;
-    endforeach;
-  
-    // Order by handling
-    usort( $results, function ( TaskEntity $a, TaskEntity $b ) use ( $args ) {
-      switch ( $args['orderBy'] ?? null ) :
-        case "title":
-          return strnatcmp($a->getTitle(), $b->getTitle());
-      
-        case "completedAt":
-          $aTime = strtotime( $a->getCompletedAt() ?? 0 );
-          $bTime = strtotime( $b->getCompletedAt() ?? 0 );
-        
-          if ( $aTime === $bTime )
-            return 0;
-        
-          return $aTime > $bTime
-            ? -1
-            : 1;
-      
-        case "createdAt":
-        default:
-          $aTime = strtotime( $a->getCreatedAt() );
-          $bTime = strtotime( $b->getCreatedAt() );
-        
-          if ( $aTime === $bTime )
-            return 0;
-        
-          return $aTime > $bTime
-            ? -1
-            : 1;
-      endswitch;
-    } );
-  
-    return array(
-      'page' => $args['page'] ?? 1,
-      'perPage' => $args['perPage'] ?? 10,
-      'total' => count($results),
-      'tasks' => array_slice($results,0,10)
+  public function list ( array $args = [] ) : array
+  {
+      $results = [];
+
+      // Filters results : we exclude unwanted tasks from output
+      foreach ($this->data as $task) :
+          // Search filter
+          if (isset($args['search']) && !str_contains($task->getTitle(), $args['search']))
+              continue;
+
+          // If we only want to show uncompleted tasks
+          if (isset($args['hideCompleted']) && $args['hideCompleted'] && $task->isCompleted())
+              continue;
+
+          $results[] = $task;
+      endforeach;
+
+      // Order by handling
+      usort($results, function (TaskEntity $a, TaskEntity $b) use ($args) {
+          switch ($args['orderBy'] ?? null) :
+              case "title":
+                  return strnatcmp($a->getTitle(), $b->getTitle());
+
+              case "completedAt":
+                  $aTime = strtotime($a->getCompletedAt() ?? 0);
+                  $bTime = strtotime($b->getCompletedAt() ?? 0);
+
+                  if ($aTime === $bTime)
+                      return 0;
+
+                  return $aTime > $bTime
+                      ? -1
+                      : 1;
+
+              case "createdAt":
+              default:
+                  $aTime = strtotime($a->getCreatedAt());
+                  $bTime = strtotime($b->getCreatedAt());
+
+                  if ($aTime === $bTime)
+                      return 0;
+
+                  return $aTime > $bTime
+                      ? -1
+                      : 1;
+          endswitch;
+      });
+$page = $args["page"] ?? 1;
+      return array(
+         // 'page'=> $_GET['page']??1,
+          'page' =>  $args['page']?? 1,
+
+          'perPage' =>  10,
+          'total' => count($results),
+          'tasks' => array_slice($results, 10*($page-1), 10),
+
+
+
+
+      /*  'tasks'=>array_slice($results,10,10),
+        'tasks'=>array_slice($results,20,10),*/
       //'task2'=>array_slice()
-    );
+  );
   }
   
   
